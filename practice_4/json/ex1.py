@@ -1,7 +1,7 @@
 import json
 
-# Open and load JSON file
-with open("sample-data.json", "r") as file:
+
+with open("GitHub_works/pp2/practice_4/json/sample_data.json", "r") as file:
     data = json.load(file)
 
 # Print header
