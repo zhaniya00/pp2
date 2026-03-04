@@ -1,169 +1,48 @@
 import re
 import json
+with open("Practice5/raw.txt", "r", encoding="utf-8") as f:
+    text = f.read()
+company = re.search(r"Филиал ТОО\s+(.+)", text)
+company = company.group(1) if company else None
 
-receipt_text = """
-ДУБЛИКАТ
-Филиал ТОО EUROPHARMA Астана
-БИН 080841000762
-НДС Серия 58002
- № 0014371
-Касса 300-190
-Смена 10
-Порядковый номер чека №61
-Чек №2331180266
-Кассир Аптека 17-1
-ПРОДАЖА
-1.
-Натрия хлорид 0,9%, 200 мл, фл
-2,000 x 154,00
-308,00
-Стоимость
-308,00
-2.
-Борный спирт 3%, 20 мл, фл.
-1,000 x 51,00
-51,00
-Стоимость
-51,00
-3.
-Шприц 2 мл, 3-х комп. (Bioject)
-2,000 x 16,00
-32,00
-Стоимость
-32,00
-4.
-Система для инфузии Vogt Medical
-2,000 x 60,00
-120,00
-Стоимость
-120,00
-5.
-Шприц 5 мл, 3-х комп. 
-1,000 x 310,00
-310,00
-Стоимость
-310,00
-6.
-AURA Ватные диски №150
-1,000 x 461,00
-461,00
-Стоимость
-461,00
-7.
-Чистая линия скраб мягкий 50 мл
-1,000 x 381,00
-381,00
-Стоимость
-381,00
-8.
-Чистая линия  скраб очищающийабрикос 50 мл
-1,000 x 386,00
-386,00
-Стоимость
-386,00
-9.
-Чистая линия скраб мягкий 50 мл
-1,000 x 381,00
-381,00
-Стоимость
-381,00
-10.
-Nivea шампунь 3в1мужской  400 мл
-1,000 x 414,00
-414,00
-Стоимость
-414,00
-11.
-Pro Series Шампунь яркий цвет 500мл
-1,000 x 841,00
-841,00
-Стоимость
-841,00
-12.
-Pro Series бальзам-ополаскивательдля длител ухода за окрашеннымиволосами Яркий цвет 500мл
-1,000 x 841,00
-841,00
-Стоимость
-841,00
-13.
-Clear шампунь Актив спорт 2в1мужской  400 мл
-1,000 x 1 200,00
-1 200,00
-Стоимость
-1 200,00
-14.
-Bio World (HYDRO THERAPY)Мицеллярная вода 5в1, 445мл
-1,000 x 1 152,00
-1 152,00
-Стоимость
-1 152,00
-15.
-Bio World (HYDRO THERAPY) Гель-муссдля умывания с гиалуроновойкислотой, 250мл
-1,000 x 1 152,00
-1 152,00
-Стоимость
-1 152,00
-16.
-[RX]-Натрия хлорид 0,9%, 100 мл, фл.
-1,000 x 168,00
-168,00
-Стоимость
-168,00
-17.
-[RX]-Дисоль р-р 400 мл, фл.
-1,000 x 163,00
-163,00
-Стоимость
-163,00
-18.
-Тагансорбент с иономи серебра №30,пор.
-1,000 x 1 526,00
-1 526,00
-Стоимость
-1 526,00
-19.
-[RX]-Церукал 2%, 2 мл, №10, амп.
-2,000 x 396,00
-792,00
-Стоимость
-792,00
-20.
-[RX]-Андазол 200 мг, №40, табл.
-1,000 x 7 330,00
-7 330,00
-Банковская карта:
-18 009,00
-ИТОГО:
-18 009,00
-в т.ч. НДС 12%:
-0,00
-Фискальный признак:
-2331180266
-Время: 18.04.2019 11:13:58
-г. Нур-султан,Казахстан, Мангилик Ел,19, нп-5
-"""
+receipt_number = re.search(r"Чек №(\d+)", text)
+receipt_number = receipt_number.group(1) if receipt_number else None
 
+cashier = re.search(r"Кассир\s+(.+)", text)
+cashier = cashier.group(1) if cashier else None
 
-prices = re.findall(r'\d[\d\s]*,\d{2}', receipt_text)
+pattern = re.compile(
+    r"\d+\.\s*\n"            
+    r"(.+?)\n"               
+    r"(\d+,\d+)\s*x\s*(\d+,\d+)\n"  
+    r"(\d+,\d+)",            
+    re.MULTILINE
+)
 
+products = []
+total_sum = 0
 
-product_names = re.findall(r'\d+\.\s*(.+?)\n\d', receipt_text, re.DOTALL)
+for match in pattern.finditer(text):
+    name = match.group(1).strip()
+    quantity = float(match.group(2).replace(',', '.'))
+    price = float(match.group(3).replace(',', '.'))
+    total = float(match.group(4).replace(',', '.'))
 
-total_match = re.search(r'ИТОГО:\s*([\d\s]+,\d{2})', receipt_text)
-total = total_match.group(1) if total_match else "Не указано"
+    total_sum += total
 
-datetime_match = re.search(r'Время:\s*(\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}:\d{2})', receipt_text)
-date_time = datetime_match.group(1) if datetime_match else "Не указано"
+    products.append({
+        "name": name,
+        "quantity": quantity,
+        "price_per_unit": price,
+        "total": total
+    })
 
-payment_match = re.search(r'(Банковская карта|Наличные):', receipt_text)
-payment_method = payment_match.group(1) if payment_match else "Не указано"
-
-data = {
-    "products": product_names,
-    "prices": prices,
-    "total": total,
-    "date_time": date_time,
-    "payment_method": payment_method
+result = {
+    "company": company,
+    "receipt_number": receipt_number,
+    "cashier": cashier,
+    "products": products,
+    "calculated_total": total_sum
 }
 
-print(json.dumps(data, ensure_ascii=False, indent=2))
+print(json.dumps(result, indent=4, ensure_ascii=False))
