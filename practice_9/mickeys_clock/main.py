@@ -1,13 +1,14 @@
 import pygame
-from clock import Clock
+from clock import MickeyClock
 
 pygame.init()
 
-screen = pygame.display.set_mode((800, 600))
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Mickey Clock")
 
-clock = Clock(screen)
-fps = pygame.time.Clock()
+clock = pygame.time.Clock()
+mickey = MickeyClock(screen)
 
 running = True
 while running:
@@ -17,9 +18,9 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    clock.draw()
+    mickey.update()
 
-    pygame.display.update()
-    fps.tick(1)  # update every second
+    pygame.display.flip()
+    clock.tick(60)
 
 pygame.quit()

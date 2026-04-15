@@ -1,20 +1,21 @@
 import pygame
-from player import Player
+from player import MusicPlayer
 
 pygame.init()
-screen = pygame.display.set_mode((500, 300))
+
+screen = pygame.display.set_mode((600, 400))
 pygame.display.set_caption("Music Player")
 
-player = Player()
-
 font = pygame.font.Font(None, 36)
+
+player = MusicPlayer()
 
 running = True
 while running:
     screen.fill((0, 0, 0))
 
-    text = font.render(f"Track: {player.index + 1}", True, (255, 255, 255))
-    screen.blit(text, (50, 120))
+    text = font.render("P-Play S-Stop N-Next B-Back Q-Quit", True, (255, 255, 255))
+    screen.blit(text, (50, 150))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -23,15 +24,15 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 player.play()
-            if event.key == pygame.K_s:
+            elif event.key == pygame.K_s:
                 player.stop()
-            if event.key == pygame.K_n:
+            elif event.key == pygame.K_n:
                 player.next()
-            if event.key == pygame.K_b:
-                player.back()
-            if event.key == pygame.K_q:
+            elif event.key == pygame.K_b:
+                player.previous()
+            elif event.key == pygame.K_q:
                 running = False
 
-    pygame.display.update()
+    pygame.display.flip()
 
 pygame.quit()

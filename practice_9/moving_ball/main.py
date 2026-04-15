@@ -3,11 +3,12 @@ from ball import Ball
 
 pygame.init()
 
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 600, 400
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Moving Ball")
 
-ball = Ball(WIDTH, HEIGHT)
+clock = pygame.time.Clock()
+ball = Ball()
 
 running = True
 while running:
@@ -18,9 +19,11 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-            ball.move(event.key)
+            ball.move(event.key, WIDTH, HEIGHT)
 
     ball.draw(screen)
-    pygame.display.update()
+
+    pygame.display.flip()
+    clock.tick(60)
 
 pygame.quit()
