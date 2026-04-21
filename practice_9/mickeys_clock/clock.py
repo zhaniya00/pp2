@@ -1,31 +1,19 @@
 import pygame
-import datetime
+import math
 
-class MickeyClock:
-    def __init__(self, screen):
-        self.screen = screen
-        self.center = (400, 300)
+class ClockHand:
+    def __init__(self, image_path, center, length_scale=1.0):
+        self.original_image = pygame.image.load(image_path).convert_alpha()
+        self.image = self.original_image
+        self.rect = self.image.get_rect(center=center)
+        self.center = center
+        self.length_scale = length_scale
 
-        # load image
-        self.hand = pygame.image.load("images/mickey_hand.png")
-        self.hand = pygame.transform.scale(self.hand, (200, 50))
+    def update(self, angle_degrees):
+        """Поворачиваем руку по углу (0° = вверх, по часовой стрелке)"""
+        # pygame.transform.rotate поворачивает против часовой стрелки, поэтому -angle
+        self.image = pygame.transform.rotozoom(self.original_image, -angle_degrees, self.length_scale)
+        self.rect = self.image.get_rect(center=self.center)
 
-        self.rect = self.hand.get_rect(center=self.center)
-
-    def draw_hand(self, angle):
-        rotated = pygame.transform.rotate(self.hand, angle)
-        rect = rotated.get_rect(center=self.center)
-        self.screen.blit(rotated, rect.topleft)
-
-    def update(self):
-        now = datetime.datetime.now()
-
-        seconds = now.second
-        minutes = now.minute
-
-        sec_angle = -seconds * 6 + 90
-        min_angle = -minutes * 6 + 90
-
-        # draw hands
-        self.draw_hand(min_angle)
-        self.draw_hand(sec_angle)
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
